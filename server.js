@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.use(express.static('public'));
+app.use(express.static('frontend'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -57,7 +57,7 @@ app.post('/login', upload.single('video'), async (req, res) => {
 
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent: ' + info.response);
-    res.redirect('/chat');
+    res.redirect('/chat.html');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error sending email');
@@ -65,7 +65,7 @@ app.post('/login', upload.single('video'), async (req, res) => {
 });
 
 app.get('/chat', (req, res) => {
-  res.sendFile(__dirname + '/public/chat.html');
+  res.sendFile(path.join(__dirname, 'frontend', 'chat.html'));
 });
 
 io.on('connection', (socket) => {
