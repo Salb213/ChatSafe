@@ -6,20 +6,21 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
   const age = document.getElementById('age').value;
 
   try {
-    const videoBlob = await getVideoBlob();
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('username', username);
-    formData.append('age', age);
-    formData.append('video', videoBlob, 'video.webm');
-    
     const position = await getPosition();
-    formData.append('lat', position.coords.latitude);
-    formData.append('lon', position.coords.longitude);
+    const payload = {
+      email,
+      username,
+      age,
+      lat: position.coords.latitude,
+      lon: position.coords.longitude,
+    };
 
-    const response = await fetch('https://your-vercel-url.vercel.app/login', {
+    const response = await fetch('https://chatsafebackend-5bkcg4gmb-salb213s-projects.vercel.app/api/login', {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
 
     if (response.redirected) {
@@ -29,33 +30,6 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     console.error('Error:', error);
   }
 });
-
-function getVideoBlob() {
-  return new Promise((resolve, reject) => {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-      .then(stream => {
-        const mediaRecorder = new MediaRecorder(stream);
-        const chunks = [];
-
-        mediaRecorder.ondataavailable = (event) => {
-          chunks.push(event.data);
-        };
-
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/webm' });
-          resolve(blob);
-        };
-
-        mediaRecorder.start();
-
-        setTimeout(() => {
-          mediaRecorder.stop();
-          stream.getTracks().forEach(track => track.stop());
-        }, 5000);  // Record for 5 seconds
-      })
-      .catch(error => reject(error));
-  });
-}
 
 function getPosition() {
   return new Promise((resolve, reject) => {
